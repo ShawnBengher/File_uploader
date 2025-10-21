@@ -1,0 +1,267 @@
+Complete Guide: Running and Pushing Challenge 1 – File Uploader (AWS S3 Integration) on macOS
+
+This step-by-step guide is designed for complete beginners. It explains how to run the provided 'File Uploader' project on macOS, test it locally, and push the project to GitHub for submission. Follow each step carefully, even if you're new to coding or the command line.
+
+1. Prerequisites (macOS)
+
+Before running the project, make sure your Mac is set up with the required tools. You'll use Terminal for all commands.
+
+To open Terminal: Press Cmd + Space → type 'Terminal' → press Enter.
+
+Step 1: Install Homebrew (if not installed):
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Step 2: Install Python 3:
+brew install python@3.12
+
+Step 3: Install AWS CLI (used to connect to AWS S3):
+brew install awscli
+
+Step 4: Prepare AWS Account and S3 Bucket:
+• Log in to your AWS account → Open S3 → Create a new bucket → Note down its name. You also need your AWS Access Key ID and Secret Access Key (from IAM → Security Credentials).
+
+2. Getting the Project Files
+
+You'll receive a ZIP file containing all project files. Follow these steps:
+
+1. Download the ZIP file onto your Mac.
+2. Double-click it to extract (it will create a folder).
+3. Open Terminal and navigate into that folder using:
+   cd /path/to/Challenge_1_File_Uploader
+
+3. Backend Setup
+
+Now, set up and run the backend API using Python:
+
+1. Create and activate a Python virtual environment:
+   python3 -m venv .venv
+   source .venv/bin/activate
+
+2. Upgrade pip and install project dependencies:
+   pip install --upgrade pip
+   pip install -r requirements.txt
+
+3. Create a '.env' file inside the backend folder with the following details:
+   AWS_ACCESS_KEY_ID=YOUR_KEY_ID
+   AWS_SECRET_ACCESS_KEY=YOUR_SECRET
+   AWS_REGION=us-east-1
+   S3_BUCKET_NAME=your-bucket-name
+   PORT=8000
+   ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
+   MAX_FILE_MB=5
+   ALLOWED_MIME_TYPES=image/png,image/jpeg,text/plain,application/pdf
+
+4. (Optional) Configure AWS CLI once:
+   aws configure
+   You'll be asked for your AWS credentials and region. Use the same keys as above and set output format to 'json'.
+
+5. Run the backend API server:
+   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+6. Check if the server is running:
+   Open your browser and visit: http://127.0.0.1:8000/health
+
+4. Frontend Setup
+
+Next, we'll serve the frontend (HTML page) locally so that it connects to the backend correctly.
+
+1. Open a new Terminal tab (Cmd + T).
+2. Navigate to the frontend folder:
+   cd ../frontend
+3. Run the local server using:
+   python3 -m http.server 5500
+4. Open your browser and visit: http://127.0.0.1:5500/index.html
+5. On the page, set the backend URL to http://127.0.0.1:8000
+6. Upload a file and see the upload success message with a presigned S3 URL.
+
+5. Quick Test Using Curl
+
+If you want to skip the frontend and directly test the API, use this command in Terminal:
+curl -F "file=@/path/to/your/file.png" http://127.0.0.1:8000/upload
+
+6. AWS S3 Permissions
+
+Your IAM user or role must have the following S3 permissions attached for the upload to work:
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowBucketObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    }
+  ]
+}
+
+7. Notes and Troubleshooting
+
+• If using a different frontend port, add it to ALLOWED_ORIGINS in .env.
+• For larger file uploads, increase MAX_FILE_MB in .env.
+• If you see 'S3_BUCKET_NAME must be set', make sure the .env file is correctly placed and activated.
+• Start the backend from within the backend folder after activating the virtual environment.
+
+8. How to Push the Project to GitHub
+
+Once the project runs successfully, follow these steps to upload your work to GitHub.
+
+Step 1: Open Terminal on Mac
+• Press Cmd + Space → type 'Terminal' → press Enter.
+
+Step 2: Navigate to your project folder:
+   cd /path/to/Challenge_1_File_Uploader
+
+Step 3: Check if Git is installed:
+   git --version
+   If not installed, run:
+   brew install git
+
+Step 4: Initialize Git:
+   git init
+   git status
+
+Step 5: Add all files:
+   git add .
+
+Step 6: Commit the files:
+   git commit -m "Initial commit: File uploader with AWS S3 integration"
+
+Step 7: Create a new GitHub repository:
+   1. Go to https://github.com
+   2. Click 'New Repository'
+   3. Name it 'file-uploader-intern-assessment'
+   4. Make it Public
+   5. Don't initialize with README or .gitignore
+   6. Click 'Create repository'
+
+Step 8: Connect your local folder to GitHub:
+   git remote add origin https://github.com/YOUR_USERNAME/file-uploader-intern-assessment.git
+   git branch -M main
+   git push -u origin main
+
+Step 9: Verify the push:
+   git remote -v
+   git status
+   git log --oneline
+
+9. Common GitHub Errors & Fixes
+
+1. Error 1: Repository not found
+   Check username in remote URL:
+   git remote -v
+   git remote set-url origin https://github.com/CORRECT_USERNAME/file-uploader-intern-assessment.git
+
+2. Error 2: Authentication failed
+   Install GitHub CLI for easy login:
+   brew install gh
+   gh auth login
+
+3. Error 3: Branch 'main' does not exist
+   git branch -M main
+   git push -u origin main
+
+10. After Pushing to GitHub
+
+1. Open your GitHub repository link in a browser.
+2. Confirm all files are visible online.
+3. Optionally create a README.md file with project details.
+4. Share the GitHub link with your assessors as final submission.
+
+11. Live Deployment Steps (All on Vercel – Recommended for Demo Video)
+
+This section guides you through deploying both the backend and frontend on Vercel, so that you can demonstrate a live working demo for your assessment video. This approach is simpler than using separate platforms (Netlify + Vercel) and works entirely in the browser.
+
+Step 1: Prepare the Code
+
+1. Make sure your project folder "Challenge_1_File_Uploader" is working locally.
+2. Confirm the backend and frontend folders are inside this directory.
+3. Test locally once (as per earlier steps) to ensure uploads and S3 integration are functional.
+
+Step 2: Create a GitHub Repository
+
+1. Open Terminal and navigate to your project folder:
+   cd /path/to/Challenge_1_File_Uploader
+2. Initialize Git and push your code (if not already done):
+   git init
+   git add .
+   git commit -m "Ready for deployment"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/file-uploader-demo.git
+   git push -u origin main
+
+Step 3: Install Vercel CLI
+
+npm install -g vercel
+
+Step 4: Deploy Backend to Vercel
+
+1. Go to https://vercel.com and sign up (you can use your GitHub account).
+2. Click "New Project" → "Import Git Repository".
+3. Select your repository (file-uploader-demo).
+4. When prompted:
+   - Root Directory: Select backend
+   - Build Command: leave blank (Python apps deploy as serverless functions)
+   - Output Directory: leave blank
+   - Environment Variables: Add the same values from your .env file:
+     AWS_ACCESS_KEY_ID=your-key-id
+     AWS_SECRET_ACCESS_KEY=your-secret
+     AWS_REGION=us-east-1
+     S3_BUCKET_NAME=your-bucket-name
+     ALLOWED_ORIGINS=https://your-frontend.vercel.app
+     MAX_FILE_MB=5
+5. Deploy and wait until Vercel gives you a live backend URL such as:
+   https://file-uploader-backend.vercel.app
+6. Visit the health check endpoint in your browser:
+   https://file-uploader-backend.vercel.app/health
+
+Step 5: Deploy Frontend to Vercel
+
+1. In your Vercel dashboard, click "Add New Project" again.
+2. Select the same GitHub repo.
+3. Set Root Directory to frontend
+4. Set Build Command to:
+   echo 'Static site'
+5. Set Output Directory to:
+   frontend
+6. Under Environment Variables, add:
+   BACKEND_URL=https://file-uploader-backend.vercel.app
+7. Deploy the project.
+8. After deployment, you'll get a frontend URL such as:
+   https://file-uploader-frontend.vercel.app
+
+Step 6: Test the Live Demo
+
+1. Open your frontend URL in a browser.
+2. In the upload box, ensure the backend URL is correctly set to your deployed backend (e.g., https://file-uploader-backend.vercel.app).
+3. Try uploading an image or text file.
+4. You should receive a presigned S3 download link if successful.
+5. Record this process for your assessment demo video.
+
+Step 7: Health Checks and Troubleshooting
+
+• Backend health check: https://file-uploader-backend.vercel.app/health
+• Frontend live link: https://file-uploader-frontend.vercel.app
+
+If any errors occur:
+- CORS errors: Ensure ALLOWED_ORIGINS in Vercel environment variables includes your frontend URL.
+- S3 errors: Check AWS keys and bucket policy permissions.
+- File too large: Adjust MAX_FILE_MB in backend environment variables.
+- Incorrect directory: Make sure backend and frontend are separate folders inside the repo.
+
+Step 8: Demo Video Tips
+
+For your final demo video:
+1. Start with a brief intro (project name and purpose).
+2. Show your GitHub repository page.
+3. Open both live Vercel URLs (backend health check + frontend).
+4. Perform one successful file upload and show the S3 link output.
+5. Mention that the project is fully hosted on free-tier platforms (Vercel + AWS S3).
+6. Duration: 1–2 minutes maximum.
+
+SUMMARY OF KEY STEPS:
+1. Local Setup: Install dependencies → Create .env → Run backend → Run frontend → Test locally
+2. GitHub: Initialize repo → Push to GitHub  
+3. Deploy: Install Vercel CLI → Deploy backend → Deploy frontend → Test live demo
+
+COST: $0/month (all platforms have generous free tiers)

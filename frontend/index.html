@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Challenge 1 - File Uploader</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --card: #1f2833;
+      --accent: #66fcf1;
+      --text: #c5c6c7;
+      --danger: #ff5c5c;
+      --success: #33d17a;
+    }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 640px; margin: 40px auto; padding: 24px; background: var(--card); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    h1 { color: var(--accent); margin-top: 0; }
+    label { display: block; margin: 12px 0 6px; }
+    input[type="file"] { width: 100%; padding: 12px; background: #0e141b; color: var(--text); border: 1px solid #2e3a46; border-radius: 8px; }
+    button { margin-top: 16px; background: var(--accent); color: #0b0c10; border: none; padding: 12px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    .status { margin-top: 14px; min-height: 24px; }
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--success); }
+    .result { margin-top: 16px; }
+    a { color: var(--accent); }
+  </style>
+  <!-- Simple, color-blind friendly palette per user preference -->
+</head>
+<body>
+  <div class="container">
+    <h1>Upload a File</h1>
+    <p>Choose a file and upload it to cloud storage. You’ll receive a temporary download link.</p>
+
+    <label for="backendUrl">Backend URL</label>
+    <input id="backendUrl" type="text" placeholder="http://127.0.0.1:8000" value="http://127.0.0.1:8000" />
+
+    <label for="fileInput">Select file</label>
+    <input id="fileInput" type="file" />
+
+    <div class="row">
+      <button id="uploadBtn">Upload</button>
+      <span id="status" class="status"></span>
+    </div>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const backendUrlEl = document.getElementById('backendUrl');
+
+    function setStatus(message, type) {
+      statusEl.textContent = message || '';
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    uploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      const backendUrl = (backendUrlEl.value || '').trim().replace(/\/$/, '');
+      if (!backendUrl) {
+        setStatus('Enter backend URL', 'error');
+        return;
+      }
+      if (!file) {
+        setStatus('Select a file first', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      uploadBtn.disabled = true;
+      setStatus('Uploading...', '');
+      resultEl.innerHTML = '';
+
+      try {
+        const res = await fetch(`${backendUrl}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.detail || 'Upload failed');
+        }
+        setStatus('Upload successful', 'success');
+        resultEl.innerHTML = `
+          <div>
+            <div><strong>Filename:</strong> ${data?.file?.filename || ''}</div>
+            <div><strong>Size:</strong> ${data?.file?.sizeBytes || 0} bytes</div>
+            <div><strong>Type:</strong> ${data?.file?.contentType || ''}</div>
+            <div><strong>Temporary URL (1 hour):</strong> <a href="${data?.url}" target="_blank" rel="noopener noreferrer">Open</a></div>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+        setStatus(err.message || 'Upload failed', 'error');
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
+
+

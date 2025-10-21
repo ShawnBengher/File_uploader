@@ -1,0 +1,7 @@
+fastapi==0.115.2
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+boto3==1.35.41
+python-dotenv==1.0.1
+werkzeug==3.0.4
+
