@@ -11,14 +11,5 @@
       "src": "/(.*)",
       "dest": "backend/main.py"
     }
-  ],
-  "env": {
-    "AWS_ACCESS_KEY_ID": "@aws_access_key_id",
-    "AWS_SECRET_ACCESS_KEY": "@aws_secret_access_key",
-    "AWS_REGION": "@aws_region",
-    "S3_BUCKET_NAME": "@s3_bucket_name",
-    "ALLOWED_ORIGINS": "@allowed_origins",
-    "MAX_FILE_MB": "@max_file_mb",
-    "ALLOWED_MIME_TYPES": "@allowed_mime_types"
-  }
+  ]
 }
